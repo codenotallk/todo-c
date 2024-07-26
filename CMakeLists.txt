@@ -13,6 +13,7 @@ target_sources (todo
   PUBLIC
   ${CMAKE_CURRENT_LIST_DIR}/src/application.c
   ${CMAKE_CURRENT_LIST_DIR}/src/task.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/task_manager.c
   ${CMAKE_CURRENT_LIST_DIR}/src/main.c
 )
 
