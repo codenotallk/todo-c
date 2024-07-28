@@ -193,7 +193,7 @@ static bool action_handler_update (void *object, action_args_t *args)
         if (task_manager_find_by (&am->manager, id, &task, &index) == true &&
             task_update (&task, args->parameters.first, args->parameters.second) == true)
         {
-            status = task_manager_update_by (&am->manager, &task, index);
+            status = task_manager_update_by (&am->manager, index, &task);
         }
     }
 
@@ -215,7 +215,7 @@ static bool action_handler_complete (void *object, action_args_t *args)
         if (task_manager_find_by (&am->manager, id, &task, &index) == true &&
             task_set_done (&task, true) == true)
         {
-            status = task_manager_update_by (&am->manager, &task, index);
+            status = task_manager_update_by (&am->manager, index, &task);
         }
     }
 
@@ -224,8 +224,6 @@ static bool action_handler_complete (void *object, action_args_t *args)
 
 static bool action_handler_save (void *object)
 {
-    bool status = false;
-
     sat_file_t file;
     action_manager_t *am = (action_manager_t *) object;
     task_t task;

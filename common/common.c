@@ -25,3 +25,11 @@ bool common_is_a_number (char *string)
 
     return status;
 }
+
+void common_string_to_lower (char *string)
+{
+    for (int i = 0; i < strlen (string); i ++)
+    {
+        string [i] = tolower (string [i]);
+    }
+}
