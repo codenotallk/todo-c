@@ -7,8 +7,8 @@
 
 typedef struct
 {
-    display_base_t *display;
-    reader_base_t *reader;
+    display_base_t display;
+    reader_base_t reader;
     action_manager_t manager;
     char *buffer;
     uint8_t size;
@@ -18,8 +18,8 @@ typedef struct
 
 typedef struct
 {
-    display_base_t *display;
-    reader_base_t *reader;
+    display_base_t display;
+    reader_base_t reader;
     char *buffer;
     uint8_t size;
 } prompt_args_t;

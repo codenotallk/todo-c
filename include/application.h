@@ -2,10 +2,12 @@
 #define APPLICATION_H_
 
 #include <sat.h>
+#include <prompt.h>
+
 
 typedef struct
 {
-    int dummy; // your context
+    prompt_t prompt;
 } todo_t;
 
 typedef struct 
