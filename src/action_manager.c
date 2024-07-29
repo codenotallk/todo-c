@@ -137,7 +137,7 @@ static bool action_handler_display (void *object, action_args_t *args, display_b
     action_manager_t *am = (action_manager_t *) object;
     task_t task;
 
-    for (uint32_t i = 0; task_manager_get_tasks_amount (&am->manager); i ++)
+    for (uint32_t i = 0; i < task_manager_get_tasks_amount (&am->manager); i ++)
     {
         if (task_manager_get_by (&am->manager, i, &task) == true)
         {

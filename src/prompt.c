@@ -3,6 +3,7 @@
 #include <command.h>
 #include <common.h>
 #include <menu.h>
+#include <style.h>
 
 static void prompt_show (prompt_t *object);
 static void prompt_read (prompt_t *object);
@@ -20,6 +21,8 @@ static void prompt_save (prompt_t *object);
 static action_args_t prompt_fill_action_args (prompt_t *object);
 static bool prompt_wanna_proceed (prompt_t *object, char *text);
 static bool prompt_asks_for_id (prompt_t *object, char *text);
+
+static void prompt_display_style (prompt_t *object, char *message, style_t style);
 
 typedef struct 
 {
@@ -63,8 +66,8 @@ bool prompt_run (prompt_t *object)
 {
     while (object->run == true)
     {
-        object->display.show (menu_logo ());
-        object->display.show (menu_show ());
+        prompt_display_style (object, menu_logo (), style_fancy);
+        prompt_display_style (object, menu_show (), style_default);
 
         prompt_show (object);
 
@@ -72,7 +75,7 @@ bool prompt_run (prompt_t *object)
 
         if (prompt_command_process (object) == false)
         {
-            // error message
+            prompt_display_style (object, "Invalid command\n\n", style_error);
         }
     }
 
@@ -81,7 +84,7 @@ bool prompt_run (prompt_t *object)
 
 static void prompt_show (prompt_t *object)
 {
-    object->display.show ("(todo) > ");
+    prompt_display_style (object, "(todo) > ", style_fancy);
 }
 
 static void prompt_read (prompt_t *object)
@@ -130,13 +133,13 @@ static void prompt_add (prompt_t *object)
 
         if (action_manager_process (&object->manager, &args, &object->display) == true)
         {
-            // success message
+            prompt_display_style (object, "New Task added successfully\n\n", style_success);
             object->modified = true;
         }
 
         else
         {
-            // error message
+            prompt_display_style (object, "Couldn't add a new Task\n\n", style_error);
         }
     }
 }
@@ -185,13 +188,13 @@ static void prompt_remove (prompt_t *object)
         {
             if (action_manager_process (&object->manager, &args, &object->display) == true)
             {
-                // success message
+                prompt_display_style (object, "Task removed successfully\n\n", style_success);
                 object->modified = true;
             }
 
             else
             {
-                // error message
+                prompt_display_style (object, "Couldn't remove the Task\n\n", style_error);
             }
         }
     }
@@ -214,17 +217,17 @@ static void prompt_update (prompt_t *object)
         if (prompt_wanna_proceed (object, text) == true)
         {
             strncpy (args.command, COMMAND_UPDATE, strlen (COMMAND_UPDATE) + 1);
-            strncpy (args.parameters.first, object->buffer, strlen (object->buffer));
+            strncpy (args.parameters.third, buffer, strlen (buffer));
 
             if (action_manager_process (&object->manager, &args, &object->display) == true)
             {
-                // success message
+                prompt_display_style (object, "Task updated successfully\n\n", style_success);
                 object->modified = true;
             }
 
             else
             {
-                // error message
+                prompt_display_style (object, "Couldn't update the Task\n\n", style_error);
             }
         }
     }
@@ -248,13 +251,13 @@ static void prompt_complete (prompt_t *object)
         {
             if (action_manager_process (&object->manager, &args, &object->display) == true)
             {
-                // success message
+                prompt_display_style (object, "Task completed successfully\n\n", style_success);
                 object->modified = true;
             }
 
             else
             {
-                // error message
+                prompt_display_style (object, "Couldn't complete the Task\n\n", style_error);
             }
         }
     }
@@ -279,10 +282,10 @@ static action_args_t prompt_fill_action_args (prompt_t *object)
 
     memset (&args, 0, sizeof (action_args_t));
 
-    object->display.show ("Type the task name: ");
+    prompt_display_style (object, "Type the task name: ", style_default);
     object->reader.read (args.parameters.first, DEFINITIONS_FIELD_SIZE);
 
-    object->display.show ("Type the task description: ");
+    prompt_display_style (object, "Type the task description: ", style_default);
     object->reader.read (args.parameters.second, DEFINITIONS_FIELD_SIZE);
 
     return args;
@@ -294,7 +297,7 @@ static bool prompt_wanna_proceed (prompt_t *object, char *text)
 
     while (true)
     {
-        object->display.show (text);
+        prompt_display_style (object, text, style_default);
 
         char buffer [11] = {0};
         object->reader.read (buffer, 10);
@@ -307,13 +310,13 @@ static bool prompt_wanna_proceed (prompt_t *object, char *text)
 
         if (strncmp (buffer, "no", strlen ("no")) == 0)
         {
-            // message cancel
+            prompt_display_style (object, "Canceled\n\n", style_error);
             break;
         }
 
         else
         {
-            // message invalid entry
+            prompt_display_style (object, "Invalid option.\n\n", style_error);
         }
     }
 
@@ -326,10 +329,9 @@ static bool prompt_asks_for_id (prompt_t *object, char *text)
 
     while (true)
     {
-        object->display.show (text);
+        prompt_display_style (object, text, style_default);
 
-        char buffer [11] = {0};
-        object->reader.read (buffer, 10);
+        object->reader.read (object->buffer, 10);
 
         if (common_is_a_number (object->buffer) == true)
         {
@@ -337,17 +339,24 @@ static bool prompt_asks_for_id (prompt_t *object, char *text)
             break;
         }
 
-        if (strncmp (buffer, "exit", strlen ("exit")) == 0)
+        if (strncmp (object->buffer, "exit", strlen ("exit")) == 0)
         {
-            // message cancel
+            prompt_display_style (object, "Canceled\n\n", style_error);
             break;
         }
 
         else
         {
-            // message invalid entry
+            prompt_display_style (object, "Please. Type a valid ID number.\n\n", style_error);
         }
     }
 
     return status;
+}
+
+static void prompt_display_style (prompt_t *object, char *message, style_t style)
+{
+    style_set (style);
+    object->display.show (message);
+    style_reset ();
 }

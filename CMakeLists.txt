@@ -19,6 +19,7 @@ target_sources (todo
   ${CMAKE_CURRENT_LIST_DIR}/src/action_manager.c
   ${CMAKE_CURRENT_LIST_DIR}/src/prompt.c
   ${CMAKE_CURRENT_LIST_DIR}/src/menu.c
+  ${CMAKE_CURRENT_LIST_DIR}/src/style.c
   ${CMAKE_CURRENT_LIST_DIR}/src/main.c
 )
 
