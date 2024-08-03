@@ -1,4 +1,5 @@
 #include <menu.h>
+#include <stdio.h>
 
 char *menu_logo (void)
 {
@@ -15,18 +16,21 @@ char *menu_logo (void)
     return logo;
 }
 
-char *menu_show (void)
+char *menu_show (translate_t *translate)
 {
-    static char *options = 
+    static char options [1024] = {0};
+    static bool initialized = false;
+
+    if (initialized == false)
     {
-        "Add      To add a new task\n"
-        "Remove   To remove a task\n"
-        "Update   To update a task\n"
-        "Display  To display tasks\n"
-        "Complete To complete a task\n"
-        "Save     To save the tasks\n"
-        "Exit     To quit application\n\n"
-    };
+        snprintf (options, 1023, "%s%s%s%s%s%s%s", translate_get_text_by (translate, type_menu_add),
+                                                   translate_get_text_by (translate, type_menu_remove),
+                                                   translate_get_text_by (translate, type_menu_update),
+                                                   translate_get_text_by (translate, type_menu_display),
+                                                   translate_get_text_by (translate, type_menu_complete),
+                                                   translate_get_text_by (translate, type_menu_save),
+                                                   translate_get_text_by (translate, type_menu_exit));
+    }
 
     return options;   
 }

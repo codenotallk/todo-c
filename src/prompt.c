@@ -57,7 +57,11 @@ bool prompt_open (prompt_t *object, prompt_args_t *args)
     object->run = true;
     object->modified = false;
 
-    status = action_manager_open (&object->manager, &(action_manager_args_t){});
+    if (action_manager_open (&object->manager, &(action_manager_args_t){}) == true && 
+        translate_init (&object->translate) == true)
+    {
+        status = true;
+    }
 
     return status;
 }
@@ -67,7 +71,7 @@ bool prompt_run (prompt_t *object)
     while (object->run == true)
     {
         prompt_display_style (object, menu_logo (), style_fancy);
-        prompt_display_style (object, menu_show (), style_default);
+        prompt_display_style (object, menu_show (&object->translate), style_default);
 
         prompt_show (object);
 
@@ -75,7 +79,9 @@ bool prompt_run (prompt_t *object)
 
         if (prompt_command_process (object) == false)
         {
-            prompt_display_style (object, "Invalid command\n\n", style_error);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_error_command),
+                                  style_error);
         }
     }
 
@@ -123,23 +129,27 @@ static bool prompt_command_process (prompt_t *object)
 
 static void prompt_add (prompt_t *object)
 {
-    char *text = "You are about to add a new task. Are you sure? (yes/no): ";
-
     action_args_t args = prompt_fill_action_args (object);
 
-    if (prompt_wanna_proceed (object, text) == true)
+    if (prompt_wanna_proceed (object,
+                              translate_get_text_by (&object->translate, type_question_task_add)) == true)
     {
         strncpy (args.command, COMMAND_ADD, strlen (COMMAND_ADD) + 1);
 
         if (action_manager_process (&object->manager, &args, &object->display) == true)
         {
-            prompt_display_style (object, "New Task added successfully\n\n", style_success);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_success_task_add),
+                                  style_success);
+
             object->modified = true;
         }
 
         else
         {
-            prompt_display_style (object, "Couldn't add a new Task\n\n", style_error);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_error_task_add),
+                                  style_error);
         }
     }
 }
@@ -157,14 +167,13 @@ static void prompt_display (prompt_t *object)
 
 static void prompt_exit (prompt_t *object)
 {
-    char *text = "You have did some modifications. Do you want to quit anyway? (yes/no): ";
-
     if (object->modified == false)
     {
         object->run = false;
     }
 
-    else if (prompt_wanna_proceed (object, text) == true)
+    else if (prompt_wanna_proceed (object,
+                                   translate_get_text_by (&object->translate, type_question_modification)) == true)
     {
         object->run = false;
     }
@@ -172,10 +181,8 @@ static void prompt_exit (prompt_t *object)
 
 static void prompt_remove (prompt_t *object)
 {
-    char *text = "Would you like to remove? (yes/no): ";
-    char *text_id = "Type the task id to delete or exit to cancel: ";
-
-    if (prompt_asks_for_id (object, text_id) == true)
+    if (prompt_asks_for_id (object,
+                            translate_get_text_by (&object->translate, type_id_remove)) == true)
     {
         action_args_t args;
 
@@ -184,17 +191,23 @@ static void prompt_remove (prompt_t *object)
         strncpy (args.command, COMMAND_REMOVE, strlen (COMMAND_REMOVE) + 1);
         strncpy (args.parameters.first, object->buffer, strlen (object->buffer));
 
-        if (prompt_wanna_proceed (object, text) == true)
+        if (prompt_wanna_proceed (object,
+                                  translate_get_text_by (&object->translate, type_question_task_remove)) == true)
         {
             if (action_manager_process (&object->manager, &args, &object->display) == true)
             {
-                prompt_display_style (object, "Task removed successfully\n\n", style_success);
+                prompt_display_style (object,
+                                      translate_get_text_by (&object->translate, type_success_task_remove),
+                                      style_success);
+
                 object->modified = true;
             }
 
             else
             {
-                prompt_display_style (object, "Couldn't remove the Task\n\n", style_error);
+                prompt_display_style (object,
+                                      translate_get_text_by (&object->translate, type_error_task_remove),
+                                      style_error);
             }
         }
     }
@@ -202,10 +215,8 @@ static void prompt_remove (prompt_t *object)
 
 static void prompt_update (prompt_t *object)
 {
-    char *text = "Would you like to update? (yes/no): ";
-    char *text_id = "Type the task id to update or exit to cancel: ";
-
-    if (prompt_asks_for_id (object, text_id) == true)
+    if (prompt_asks_for_id (object,
+                            translate_get_text_by (&object->translate, type_id_update)) == true)
     {
 
         char buffer [DEFINITIONS_FIELD_SIZE + 1] = {0};
@@ -214,20 +225,26 @@ static void prompt_update (prompt_t *object)
 
         action_args_t args = prompt_fill_action_args (object);
 
-        if (prompt_wanna_proceed (object, text) == true)
+        if (prompt_wanna_proceed (object,
+                                  translate_get_text_by (&object->translate, type_question_task_update)) == true)
         {
             strncpy (args.command, COMMAND_UPDATE, strlen (COMMAND_UPDATE) + 1);
             strncpy (args.parameters.third, buffer, strlen (buffer));
 
             if (action_manager_process (&object->manager, &args, &object->display) == true)
             {
-                prompt_display_style (object, "Task updated successfully\n\n", style_success);
+                prompt_display_style (object,
+                                      translate_get_text_by (&object->translate, type_success_task_update),
+                                      style_success);
+
                 object->modified = true;
             }
 
             else
             {
-                prompt_display_style (object, "Couldn't update the Task\n\n", style_error);
+                prompt_display_style (object,
+                                      translate_get_text_by (&object->translate, type_error_task_update),
+                                      style_error);
             }
         }
     }
@@ -235,10 +252,8 @@ static void prompt_update (prompt_t *object)
 
 static void prompt_complete (prompt_t *object)
 {
-    char *text = "Would you like to complete? (yes/no): ";
-    char *text_id = "Type the task id to complete or exit to cancel: ";
-
-    if (prompt_asks_for_id (object, text_id) == true)
+    if (prompt_asks_for_id (object,
+                            translate_get_text_by (&object->translate, type_id_complete)) == true)
     {
         action_args_t args;
 
@@ -247,17 +262,23 @@ static void prompt_complete (prompt_t *object)
         strncpy (args.command, COMMAND_COMPLETE, strlen (COMMAND_COMPLETE) + 1);
         strncpy (args.parameters.first, object->buffer, strlen (object->buffer));
 
-        if (prompt_wanna_proceed (object, text) == true)
+        if (prompt_wanna_proceed (object,
+                                  translate_get_text_by (&object->translate, type_question_task_complete)) == true)
         {
             if (action_manager_process (&object->manager, &args, &object->display) == true)
             {
-                prompt_display_style (object, "Task completed successfully\n\n", style_success);
+                prompt_display_style (object,
+                                      translate_get_text_by (&object->translate, type_success_task_complete),
+                                      style_success);
+
                 object->modified = true;
             }
 
             else
             {
-                prompt_display_style (object, "Couldn't complete the Task\n\n", style_error);
+                prompt_display_style (object,
+                                      translate_get_text_by (&object->translate, type_error_task_complete),
+                                      style_error);
             }
         }
     }
@@ -282,10 +303,16 @@ static action_args_t prompt_fill_action_args (prompt_t *object)
 
     memset (&args, 0, sizeof (action_args_t));
 
-    prompt_display_style (object, "Type the task name: ", style_default);
+    prompt_display_style (object,
+                          translate_get_text_by (&object->translate, type_task_name),
+                          style_default);
+
     object->reader.read (args.parameters.first, DEFINITIONS_FIELD_SIZE);
 
-    prompt_display_style (object, "Type the task description: ", style_default);
+    prompt_display_style (object,
+                          translate_get_text_by (&object->translate, type_task_description),
+                          style_default);
+
     object->reader.read (args.parameters.second, DEFINITIONS_FIELD_SIZE);
 
     return args;
@@ -302,21 +329,29 @@ static bool prompt_wanna_proceed (prompt_t *object, char *text)
         char buffer [11] = {0};
         object->reader.read (buffer, 10);
 
-        if (strncmp (buffer, "yes", strlen ("yes")) == 0)
+        if (strncmp (buffer,
+                     translate_get_text_by (&object->translate, type_input_yes),
+                     strlen (translate_get_text_by (&object->translate, type_input_yes))) == 0)
         {
             status = true;
             break;
         }
 
-        if (strncmp (buffer, "no", strlen ("no")) == 0)
+        if (strncmp (buffer,
+                     translate_get_text_by (&object->translate, type_input_no),
+                     strlen (translate_get_text_by (&object->translate, type_input_no))) == 0)
         {
-            prompt_display_style (object, "Canceled\n\n", style_error);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_error_canceled),
+                                  style_error);
             break;
         }
 
         else
         {
-            prompt_display_style (object, "Invalid option.\n\n", style_error);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_error_option),
+                                  style_error);
         }
     }
 
@@ -339,15 +374,21 @@ static bool prompt_asks_for_id (prompt_t *object, char *text)
             break;
         }
 
-        if (strncmp (object->buffer, "exit", strlen ("exit")) == 0)
+        if (strncmp (object->buffer,
+                     translate_get_text_by (&object->translate, type_input_exit),
+                     strlen (translate_get_text_by (&object->translate, type_input_exit))) == 0)
         {
-            prompt_display_style (object, "Canceled\n\n", style_error);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_error_canceled),
+                                  style_error);
             break;
         }
 
         else
         {
-            prompt_display_style (object, "Please. Type a valid ID number.\n\n", style_error);
+            prompt_display_style (object,
+                                  translate_get_text_by (&object->translate, type_error_task_id),
+                                  style_error);
         }
     }
 

@@ -78,3 +78,11 @@ In my case I am a portuguese speaker. It will be nice have some internacionaliza
 To select which language the program will show its message.
 
 So. Bye
+
+-------------------------------------------------------------------------------------------
+So the idea here is to get all the texts in the application and put in one place to
+get the message through a tag.
+
+I'll group these texts by error, success, whatever.
+
+The first part is concluded. Now is provide a file using the tags to translate for another language.

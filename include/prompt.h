@@ -4,12 +4,14 @@
 #include <display_base.h>
 #include <reader_base.h>
 #include <action_manager.h>
+#include <translate.h>
 
 typedef struct
 {
     display_base_t display;
     reader_base_t reader;
     action_manager_t manager;
+    translate_t translate;
     char *buffer;
     uint8_t size;
     bool run;
