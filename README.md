@@ -86,3 +86,20 @@ get the message through a tag.
 I'll group these texts by error, success, whatever.
 
 The first part is concluded. Now is provide a file using the tags to translate for another language.
+
+-------------------------------------------------------------------------------------------
+
+In this video, I will implement a load file for translate.
+
+In this version will be loaded by argument.
+
+So I need to bring the args from main to inside the application.
+
+For load the file I'll use the sat_file.
+The file format will be in JSON. So I'll use sat_json to get the values
+
+These last ones. I don't want to allow to overwrite the ADD, Display ....
+So we shift
+
+
+This bug is because I'm not clearing the buffer before copy a new string.

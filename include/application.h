@@ -12,7 +12,7 @@ typedef struct
 
 typedef struct 
 {
-    int dummy;
+    char *filename;
 } todo_args_t;
 
 sat_status_t todo_init (todo_t *object);

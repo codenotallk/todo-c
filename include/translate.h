@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 
+#define TRANSLATE_CONTENT_SIZE      100
 typedef enum 
 {
     type_error_command,
@@ -44,7 +45,7 @@ typedef struct
 {
     type_t type;
     const char *tag;
-    char *content;
+    char content [TRANSLATE_CONTENT_SIZE + 1];
 } text_t;
 
 typedef struct 
@@ -53,7 +54,7 @@ typedef struct
     bool initialized;
 } translate_t;
 
-bool translate_init (translate_t *object);
+bool translate_init (translate_t *object, char *filename);
 char *translate_get_text_by (translate_t *object, type_t type);
 
 #endif/* TRANSLATE_H_ */

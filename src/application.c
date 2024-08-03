@@ -41,7 +41,8 @@ sat_status_t todo_open (todo_t *object, todo_args_t *args)
                                                         .display.show = application_show,
                                                         .reader.read  = application_read,
                                                         .buffer = buffer,
-                                                        .size = DEFINITIONS_FIELD_SIZE
+                                                        .size = DEFINITIONS_FIELD_SIZE,
+                                                        .filename = args->filename
                                                       });
 
         if (__status == true)

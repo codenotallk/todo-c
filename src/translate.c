@@ -1,5 +1,6 @@
 #include <translate.h>
 #include <string.h>
+#include <sat.h>
 
 static text_t texts [] = 
 {
@@ -37,9 +38,45 @@ static text_t texts [] =
     {.type = type_menu_exit,              .tag = "menu.exit",              .content = "Exit     To quit application\n\n"},
 };
 
-// static unsigned char text_amount = sizeof (texts) / sizeof (texts [0]);
+static unsigned char text_amount = sizeof (texts) / sizeof (texts [0]);
 
-bool translate_init (translate_t *object)
+static sat_json_mapper_t mapper [] = 
+{
+    { .token = "error.command", .data = texts [type_error_command].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.option", .data = texts [type_error_option].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.canceled", .data = texts [type_error_canceled].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.task.add", .data = texts [type_error_task_add].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.task.remove", .data = texts [type_error_task_remove].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.task.update", .data = texts [type_error_task_update].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.task.complete", .data = texts [type_error_task_complete].content, .type = sat_json_type_string, .size = 100},
+    { .token = "error.task.id", .data = texts [type_error_task_id].content, .type = sat_json_type_string, .size = 100},
+    { .token = "question.modification", .data = texts [type_question_modification].content, .type = sat_json_type_string, .size = 100},
+    { .token = "question.task.add", .data = texts [type_question_task_add].content, .type = sat_json_type_string, .size = 100},
+    { .token = "question.task.remove", .data = texts [type_question_task_remove].content, .type = sat_json_type_string, .size = 100},
+    { .token = "question.task.update", .data = texts [type_question_task_update].content, .type = sat_json_type_string, .size = 100},
+    { .token = "question.task.complete", .data = texts [type_question_task_complete].content, .type = sat_json_type_string, .size = 100},
+    { .token = "success.task.add", .data = texts [type_success_task_add].content, .type = sat_json_type_string, .size = 100},
+    { .token = "success.task.remove", .data = texts [type_success_task_remove].content, .type = sat_json_type_string, .size = 100},
+    { .token = "success.task.update", .data = texts [type_success_task_update].content, .type = sat_json_type_string, .size = 100},
+    { .token = "success.task.complete", .data = texts [type_success_task_complete].content, .type = sat_json_type_string, .size = 100},
+    { .token = "id.remove", .data = texts [type_id_remove].content, .type = sat_json_type_string, .size = 100},
+    { .token = "id.update", .data = texts [type_id_update].content, .type = sat_json_type_string, .size = 100},
+    { .token = "id.complete", .data = texts [type_id_complete].content, .type = sat_json_type_string, .size = 100},
+    { .token = "task.name", .data = texts [type_task_name].content, .type = sat_json_type_string, .size = 100},
+    { .token = "task.description", .data = texts [type_task_description].content, .type = sat_json_type_string, .size = 100},
+    { .token = "input.yes", .data = texts [type_input_yes].content, .type = sat_json_type_string, .size = 100},
+    { .token = "input.no", .data = texts [type_input_no].content, .type = sat_json_type_string, .size = 100},
+    { .token = "input.exit", .data = texts [type_input_exit].content, .type = sat_json_type_string, .size = 100},
+    { .token = "menu.add", .data = &texts [type_menu_add].content [9], .type = sat_json_type_string, .size = 90},
+    { .token = "menu.remove", .data = &texts [type_menu_remove].content [9], .type = sat_json_type_string, .size = 90},
+    { .token = "menu.update", .data = &texts [type_menu_update].content [9], .type = sat_json_type_string, .size = 90},
+    { .token = "menu.display", .data = &texts [type_menu_display].content [9], .type = sat_json_type_string, .size = 90},
+    { .token = "menu.complete", .data = &texts [type_menu_complete].content [9], .type = sat_json_type_string, .size = 90},
+    { .token = "menu.save", .data = &texts [type_menu_save].content [9], .type = sat_json_type_string, .size = 90},
+    { .token = "menu.exit", .data = &texts [type_menu_exit].content [9], .type = sat_json_type_string, .size = 90},
+};
+
+bool translate_init (translate_t *object, char *filename)
 {
     bool status = false;
 
@@ -47,6 +84,24 @@ bool translate_init (translate_t *object)
     {
         object->texts = texts;
         object->initialized = true;
+
+        if (filename != NULL)
+        {
+            //load file
+            sat_file_t file;
+            if (sat_file_open (&file, filename, sat_file_mode_read) == true)
+            {
+                uint32_t size = sat_file_get_size (&file);
+                char *buffer = calloc (1, size + 1);
+
+                sat_file_read (&file, buffer, size);
+                sat_file_close (&file);
+                
+                sat_json_t json;
+
+                sat_json_deserialize (&json, buffer, mapper, text_amount);
+            }
+        }
 
         status = true;
     }

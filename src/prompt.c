@@ -58,7 +58,7 @@ bool prompt_open (prompt_t *object, prompt_args_t *args)
     object->modified = false;
 
     if (action_manager_open (&object->manager, &(action_manager_args_t){}) == true && 
-        translate_init (&object->translate) == true)
+        translate_init (&object->translate, args->filename) == true)
     {
         status = true;
     }

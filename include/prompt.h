@@ -24,6 +24,7 @@ typedef struct
     reader_base_t reader;
     char *buffer;
     uint8_t size;
+    char *filename;
 } prompt_args_t;
 
 bool prompt_open (prompt_t *object, prompt_args_t *args);

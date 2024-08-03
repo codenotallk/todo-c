@@ -30,6 +30,8 @@ char *menu_show (translate_t *translate)
                                                    translate_get_text_by (translate, type_menu_complete),
                                                    translate_get_text_by (translate, type_menu_save),
                                                    translate_get_text_by (translate, type_menu_exit));
+
+        initialized = true;
     }
 
     return options;   

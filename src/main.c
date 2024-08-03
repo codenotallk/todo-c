@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     todo_t todo;
     todo_args_t args =
     {
-        .dummy = 1
+        .filename = argv [1]
     };
 
     do
